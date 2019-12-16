@@ -23,9 +23,10 @@ namespace jcu {
             OnConnectCallback_t on_connect_;
             OnCloseCallback_t on_close_;
             OnErrorCallback_t on_error_;
+            OnEndCallback_t on_end_;
             OnDataCallback_t on_data_;
 
-            std::shared_ptr<uvw::TCPHandle> sock_handle_;
+            std::weak_ptr<uvw::TCPHandle> sock_handle_;
 
             std::string remote_ip_;
             int remote_port_;
@@ -45,6 +46,7 @@ namespace jcu {
             void cleanup() override;
 
             void onData(const OnDataCallback_t& callback) override;
+            void onEnd(const OnEndCallback_t& on_error) override;
             void write(std::unique_ptr<char[]> data, size_t length) override;
         };
     }

@@ -35,6 +35,11 @@ namespace jcu {
             on_close_ = on_close;
             on_error_ = on_error;
 
+            transport_->onEnd([this](Transport& transport) -> void {
+                if(on_end_) {
+                    on_end_(*this);
+                }
+            });
             transport_->onData([this](Transport& transport, std::unique_ptr<char[]> data, size_t length) -> void {
                 if(ssl_socket_) {
                     ssl_socket_->feedRead(std::move(data), length);
@@ -94,6 +99,9 @@ namespace jcu {
         }
         void TlsTransport::onData(const OnDataCallback_t &on_data) {
             this->on_data_ = on_data;
+        }
+        void TlsTransport::onEnd(const OnEndCallback_t &on_end) {
+            on_end_ = on_end;
         }
         void TlsTransport::write(std::unique_ptr<char[]> data, size_t length) {
             this->ssl_socket_->write(std::move(data), length);

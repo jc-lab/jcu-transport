@@ -223,6 +223,14 @@ namespace jcu {
             std::unique_ptr<char[]> buf(new char[pending]);
 
             int p = BIO_read(app_bio_, buf.get(), pending);
+            if(p != pending) {
+                if(error_callback_) {
+                    OpensslSslEngineError err((p < 0) ? p : 0, "BIO_read", "BIO_read failed");
+                    //int code, const std::string &name, const std::string &what
+                    error_callback_(this, err);
+                }
+                return -1;
+            }
             // assert(p == pending);
 
             // assert( conn->writer != NULL && "You need to set network writer first");

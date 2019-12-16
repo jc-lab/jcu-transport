@@ -121,6 +121,7 @@ namespace jcu {
             }
         }
         void TcpTransport::cleanup() {
+            disconnect();
             on_connect_ = nullptr;
             on_close_ = nullptr;
         }

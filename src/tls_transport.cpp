@@ -69,9 +69,9 @@ namespace jcu {
 					  }
                   },
                   [this](SslEngine::SocketContext *socket_context, int status) -> void {
-                    // Close
-                    transport_->disconnect();
-                    ssl_socket_ = nullptr;
+                      // Close
+                      transport_->disconnect();
+                      ssl_socket_ = nullptr;
                   },
                   [this](SslEngine::SocketContext *socket_context, Error &err) -> void {
                       if(on_error_) {
@@ -95,6 +95,7 @@ namespace jcu {
             ssl_socket_->disconnect();
         }
         void TlsTransport::cleanup() {
+            transport_->cleanup();
             on_connect_ = nullptr;
             on_close_ = nullptr;
         }

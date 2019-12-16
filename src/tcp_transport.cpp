@@ -77,10 +77,13 @@ namespace jcu {
             sock_handle->once<uvw::ShutdownEvent>([this](uvw::ShutdownEvent &evt, uvw::TCPHandle &handle) -> void {
             });
             sock_handle->on<uvw::EndEvent>([this](uvw::EndEvent &evt, uvw::TCPHandle &handle) -> void {
+                bool cancel = false;
                 if(on_end_) {
-                    on_end_(*this);
+                    cancel = on_end_(*this);
                 }
-                handle.close();
+                if(!cancel) {
+                    handle.close();
+                }
             });
             sock_handle->once<uvw::ConnectEvent>([this](uvw::ConnectEvent &evt, uvw::TCPHandle &handle) -> void {
               handle.read();

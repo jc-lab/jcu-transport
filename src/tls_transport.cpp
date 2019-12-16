@@ -35,10 +35,11 @@ namespace jcu {
             on_close_ = on_close;
             on_error_ = on_error;
 
-            transport_->onEnd([this](Transport& transport) -> void {
+            transport_->onEnd([this](Transport& transport) -> bool {
                 if(on_end_) {
-                    on_end_(*this);
+                    return on_end_(*this);
                 }
+                return false;
             });
             transport_->onData([this](Transport& transport, std::unique_ptr<char[]> data, size_t length) -> void {
                 if(ssl_socket_) {

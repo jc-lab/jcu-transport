@@ -28,7 +28,7 @@ namespace jcu {
             typedef std::function<void(Transport &transport, std::unique_ptr<char[]> data, size_t length)> OnDataCallback_t;
             typedef std::function<void(Transport &transport)> OnCloseCallback_t;
             typedef std::function<void(Transport &transport, Error &err)> OnErrorCallback_t;
-            typedef std::function<void(Transport &transport)> OnEndCallback_t;
+            typedef std::function<bool(Transport &transport)> OnEndCallback_t;
 
             Transport(std::shared_ptr<uvw::Loop> loop) : loop_(loop) {}
             virtual ~Transport() {}

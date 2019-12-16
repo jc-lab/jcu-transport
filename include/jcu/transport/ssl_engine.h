@@ -15,6 +15,8 @@
 #include <memory>
 #include <functional>
 
+#include "error.h"
+
 namespace jcu {
     namespace transport {
         /**
@@ -28,6 +30,7 @@ namespace jcu {
             typedef std::function<void(SocketContext *ssl_socket_ctx, int status)> WriteCallback_t;
             typedef std::function<void(SocketContext *ssl_socket_ctx, const char *buf, int size)> ReadCallback_t;
             typedef std::function<void(SocketContext *ssl_socket_ctx, int status)> CloseCallback_t;
+            typedef std::function<void(SocketContext *ssl_socket_ctx, Error& err)> ErrorCallback_t;
 
             class SocketContext {
             public:
@@ -49,7 +52,8 @@ namespace jcu {
                 HandshakeCallback_t handshake_callback,
                 WriteCallback_t write_callback,
                 ReadCallback_t read_callback,
-                CloseCallback_t close_callback
+                CloseCallback_t close_callback,
+                ErrorCallback_t error_callback
                 ) = 0;
         };
     }

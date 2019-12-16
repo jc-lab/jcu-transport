@@ -54,6 +54,7 @@ namespace jcu {
                 WriteCallback_t write_callback_;
                 ReadCallback_t read_callback_;
                 CloseCallback_t close_callback_;
+                ErrorCallback_t error_callback_;
 
                 //Our BIO, all IO should be through this
                 BIO     *app_bio_;
@@ -71,7 +72,8 @@ namespace jcu {
                                                          HandshakeCallback_t handshake_callback,
                                                          WriteCallback_t write_callback,
                                                          ReadCallback_t read_callback,
-                                                         CloseCallback_t close_callback) override;
+                                                         CloseCallback_t close_callback,
+                                                         ErrorCallback_t error_callback) override;
         };
     }
 }

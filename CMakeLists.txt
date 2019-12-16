@@ -5,6 +5,7 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 set(INC_FILES
+        ${CMAKE_CURRENT_SOURCE_DIR}/include/jcu/transport/error.h
         ${CMAKE_CURRENT_SOURCE_DIR}/include/jcu/transport/transport.h
         ${CMAKE_CURRENT_SOURCE_DIR}/include/jcu/transport/ssl_engine.h
         ${CMAKE_CURRENT_SOURCE_DIR}/include/jcu/transport/tcp_transport.h

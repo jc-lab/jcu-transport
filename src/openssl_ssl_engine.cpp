@@ -12,6 +12,29 @@
 namespace jcu {
     namespace transport {
 
+        class OpensslSslEngineError : public Error {
+        public:
+            int code_;
+            std::string name_;
+            std::string what_;
+
+            OpensslSslEngineError(int code, const std::string &name, const std::string &what)
+                : code_(code), name_(name), what_(what) {}
+
+            const char *what() const override {
+                return what_.c_str();
+            }
+            const char *name() const override {
+                return name_.c_str();
+            }
+            int code() const override {
+                return code_;
+            }
+            explicit operator bool() const override {
+                return true;
+            }
+        };
+
         std::shared_ptr<OpensslSslEngine> OpensslSslEngine::create(const SSL_METHOD *meth) {
             std::shared_ptr<OpensslSslEngine> instance(new OpensslSslEngine());
             instance->ssl_ctx_ = SSL_CTX_new(meth);
@@ -23,7 +46,8 @@ namespace jcu {
             HandshakeCallback_t handshake_callback,
             WriteCallback_t write_callback,
             ReadCallback_t read_callback,
-            CloseCallback_t close_callback
+            CloseCallback_t close_callback,
+            ErrorCallback_t error_callback
             ) {
             int r;
             std::shared_ptr<OpensslSocketContext> ctx(new OpensslSocketContext());
@@ -34,6 +58,7 @@ namespace jcu {
             ctx->write_callback_ = write_callback;
             ctx->read_callback_ = read_callback;
             ctx->close_callback_ = close_callback;
+            ctx->error_callback_ = error_callback;
 
             ctx->ssl_ = SSL_new(this->ssl_ctx_);
 
@@ -107,7 +132,7 @@ namespace jcu {
                     r = SSL_do_handshake(ssl_);
                     bytes = sendPending();
                     if(bytes < 0) {
-                        // ERROR
+                        OpensslSslEngineError err(bytes, "sendPending", "sendPending in OP_HANDSHAKE failed");
                         return -1;
                     }
                     if (1 == r || 0 == r) {

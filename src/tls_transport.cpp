@@ -29,25 +29,25 @@ namespace jcu {
         }
 
         void TlsTransport::connect(const Transport::OnConnectCallback_t &on_connect,
-                                   const Transport::OnCloseCallback_t &on_close) {
+                                   const Transport::OnCloseCallback_t &on_close,
+                                   const Transport::OnErrorCallback_t &on_error) {
             on_connect_ = on_connect;
             on_close_ = on_close;
+            on_error_ = on_error;
 
-            transport_->onData([this](Transport *transport, std::unique_ptr<char[]> data, size_t length) -> void {
+            transport_->onData([this](Transport& transport, std::unique_ptr<char[]> data, size_t length) -> void {
                 if(ssl_socket_) {
                     ssl_socket_->feedRead(std::move(data), length);
                 }
             });
-            transport_->connect([this](Transport* transport) -> void {
+            transport_->connect([this](Transport& transport) -> void {
               std::shared_ptr<TlsTransport> self = self_.lock();
               ssl_socket_ = engine_->createContext(
                   transport_,
                   [this](SslEngine::SocketContext *socket_context, int status) -> void {
                     // Handshake
-
-                    if(on_connect_)
-                    {
-                        on_connect_(this);
+                    if(on_connect_) {
+                        on_connect_(*this);
                     }
                   },
                   [this](SslEngine::SocketContext *socket_context, int status) -> void {
@@ -59,22 +59,28 @@ namespace jcu {
 					  if (on_data_) {
 						  std::unique_ptr<char[]> ubuf(new char[size]);
 						  memcpy(ubuf.get(), buf, size);
-						  on_data_(this, std::move(ubuf), size);
+						  on_data_(*this, std::move(ubuf), size);
 					  }
                   },
                   [this](SslEngine::SocketContext *socket_context, int status) -> void {
                     // Close
                     transport_->disconnect();
                     ssl_socket_ = nullptr;
+                  },
+                  [this](SslEngine::SocketContext *socket_context, Error &err) -> void {
+                      if(on_error_) {
+                          on_error_(*this, err);
+                      }
                   }
               );
               ssl_socket_->handshake();
-            }, [this](Transport* transport) -> void {
+            }, [this](Transport& transport) -> void {
                 if(on_close_) {
-                    on_close_(this);
+                    on_close_(*this);
                 }
                 ssl_socket_ = nullptr;
-            });
+            },
+            on_error_);
         }
         void TlsTransport::reconnect() {
             transport_->reconnect();

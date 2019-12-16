@@ -12,6 +12,34 @@
 namespace jcu {
     namespace transport {
 
+        class TcpTransportError : public Error {
+        public:
+            int code_;
+            std::string name_;
+            std::string what_;
+
+            TcpTransportError(const uvw::ErrorEvent &evt) {
+                const char *name = evt.name();
+                const char *what = evt.what();
+                if(name) name_ = name;
+                if(what) what_ = what;
+                code_ = evt.code();
+            }
+
+            const char *what() const override {
+                return what_.c_str();
+            }
+            const char *name() const override {
+                return name_.c_str();
+            }
+            int code() const override {
+                return code_;
+            }
+            explicit operator bool() const override {
+                return true;
+            }
+        };
+
         std::shared_ptr<TcpTransport> TcpTransport::create(std::shared_ptr<uvw::Loop> loop) {
             std::shared_ptr<TcpTransport> instance(new TcpTransport(loop));
             instance->self_ = instance;
@@ -33,10 +61,12 @@ namespace jcu {
 
         void TcpTransport::connect(
             const Transport::OnConnectCallback_t &on_connect,
-            const Transport::OnCloseCallback_t &on_close
+            const Transport::OnCloseCallback_t &on_close,
+            const OnErrorCallback_t& on_error
             ) {
             on_connect_ = on_connect;
             on_close_ = on_close;
+            on_error_ = on_error;
 
             reconnect();
         }
@@ -51,19 +81,23 @@ namespace jcu {
             sock_handle_->once<uvw::ConnectEvent>([this](uvw::ConnectEvent &evt, uvw::TCPHandle &handle) -> void {
               handle.read();
                 if(on_connect_) {
-                    on_connect_(this);
+                    on_connect_(*this);
                 }
             });
             sock_handle_->once<uvw::CloseEvent>([this](uvw::CloseEvent &evt, uvw::TCPHandle &handle) -> void {
                 if(on_close_) {
-                    on_close_(this);
+                    on_close_(*this);
                 }
             });
             sock_handle_->on<uvw::ErrorEvent>([this](uvw::ErrorEvent &evt, uvw::TCPHandle &handle) -> void {
+                TcpTransportError err(evt);
+                if(on_error_) {
+                    on_error_(*this, err);
+                }
             });
             sock_handle_->on<uvw::DataEvent>([this](uvw::DataEvent &evt, uvw::TCPHandle &handle) -> void {
               if(on_data_) {
-                  on_data_(this, std::move(evt.data), evt.length);
+                  on_data_(*this, std::move(evt.data), evt.length);
               }
             });
             sock_handle_->on<uvw::WriteEvent>([this](uvw::WriteEvent &evt, uvw::TCPHandle &handle) -> void {

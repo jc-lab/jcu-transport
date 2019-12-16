@@ -15,6 +15,8 @@
 
 #include <uvw/loop.hpp>
 
+#include "error.h"
+
 namespace jcu {
     namespace transport {
         class Transport {
@@ -22,14 +24,15 @@ namespace jcu {
             std::shared_ptr<uvw::Loop> loop_;
 
         public:
-            typedef std::function<void(Transport *transport)> OnConnectCallback_t;
-            typedef std::function<void(Transport *transport, std::unique_ptr<char[]> data, size_t length)> OnDataCallback_t;
-            typedef std::function<void(Transport *transport)> OnCloseCallback_t;
+            typedef std::function<void(Transport &transport)> OnConnectCallback_t;
+            typedef std::function<void(Transport &transport, std::unique_ptr<char[]> data, size_t length)> OnDataCallback_t;
+            typedef std::function<void(Transport &transport)> OnCloseCallback_t;
+            typedef std::function<void(Transport &transport, Error &err)> OnErrorCallback_t;
 
             Transport(std::shared_ptr<uvw::Loop> loop) : loop_(loop) {}
             virtual ~Transport() {}
 
-            virtual void connect(const OnConnectCallback_t& on_connect, const OnCloseCallback_t& on_close) = 0;
+            virtual void connect(const OnConnectCallback_t& on_connect, const OnCloseCallback_t& on_close, const OnErrorCallback_t& on_error) = 0;
             virtual void reconnect() = 0;
             virtual void disconnect() = 0;
             virtual void cleanup() = 0; // remove callbacks (delete shared_ptr references)

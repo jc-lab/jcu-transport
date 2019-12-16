@@ -72,6 +72,10 @@ namespace jcu {
             return ctx;
         }
 
+        SSL_CTX *OpensslSslEngine::getOpensslSslCtx() {
+            return ssl_ctx_;
+        }
+
         OpensslSslEngine::OpensslSocketContext::OpensslSocketContext() {
             ssl_ = NULL;
         }

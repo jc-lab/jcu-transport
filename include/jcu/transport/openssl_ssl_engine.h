@@ -74,6 +74,8 @@ namespace jcu {
                                                          ReadCallback_t read_callback,
                                                          CloseCallback_t close_callback,
                                                          ErrorCallback_t error_callback) override;
+
+            SSL_CTX *getOpensslSslCtx();
         };
     }
 }

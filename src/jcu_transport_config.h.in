@@ -1,0 +1,6 @@
+#ifndef __JCU_TRANSPORT_CONFIG_H__
+#define __JCU_TRANSPORT_CONFIG_H__
+
+#cmakedefine JCU_TRANSPORT_HAS_OPENSSL
+
+#endif // __JCU_TRANSPORT_CONFIG_H__

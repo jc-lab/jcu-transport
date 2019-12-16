@@ -137,6 +137,9 @@ namespace jcu {
                     bytes = sendPending();
                     if(bytes < 0) {
                         OpensslSslEngineError err(bytes, "sendPending", "sendPending in OP_HANDSHAKE failed");
+                        if(error_callback_) {
+                            error_callback_(this, err);
+                        }
                         return -1;
                     }
                     if (1 == r || 0 == r) {

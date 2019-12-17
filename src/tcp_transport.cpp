@@ -101,6 +101,7 @@ namespace jcu {
                 if(on_error_) {
                     on_error_(*this, err);
                 }
+                handle.close();
             });
             sock_handle->on<uvw::DataEvent>([this](uvw::DataEvent &evt, uvw::TCPHandle &handle) -> void {
               if(on_data_) {

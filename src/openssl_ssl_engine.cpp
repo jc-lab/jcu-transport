@@ -161,10 +161,10 @@ namespace jcu {
                     }
                     else {
                         //write pending data, if nothing is pending, we assume
-                        //that SSL_read failed and triger the read_cb
+                        //that SSL_read failed and shutdown
                         bytes = sendPending();
                         if ( bytes == 0 && read_callback_) {
-                            read_callback_(this, tbuf, r);
+                            goto handle_shutdown;
                         }
                     }
                     break;
